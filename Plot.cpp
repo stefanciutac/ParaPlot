@@ -45,7 +45,7 @@ Point Plot::find_max_xyz(std::vector<Point> points)
     std::sort(points.begin(), points.end(),
         [](Point& a, Point& b)
         {
-            return abs(a.x) > abs(b.x);
+            return a.x > b.x;
         }
     );
     int max_x = points.front().x;
@@ -53,7 +53,7 @@ Point Plot::find_max_xyz(std::vector<Point> points)
     std::sort(points.begin(), points.end(),
         [](Point& a, Point& b)
         {
-            return abs(a.y) > abs(b.y);
+            return a.y > b.y;
         }
     );
     int max_y = points.front().y;
@@ -61,7 +61,7 @@ Point Plot::find_max_xyz(std::vector<Point> points)
     std::sort(points.begin(), points.end(),
         [](Point& a, Point& b)
         {
-            return abs(a.z) > abs(b.z);
+            return a.z > b.z;
         }
     );
     int max_z = points.front().z;
@@ -69,26 +69,22 @@ Point Plot::find_max_xyz(std::vector<Point> points)
     return Point{double(max_x), double(max_y), double(max_z)};
 }
 
-
-Point Plot::normalise_point(Point given_point, Point max_in_dataset, Point max_valid)
+double Plot::minmax(double min_target, double max_target, double min_data, double max_data, double x)
 {
-    int x_norm = given_point.x * std::min(1, abs(int(max_valid.x / max_in_dataset.x)));
-    // std::cout << "x_norm = " << x_norm << "\tfor max_in_dataset = " << max_in_dataset.x << "\tgiven point = " << given_point.x << std::endl;
-    int y_norm = given_point.y * std::min(1, int(max_valid.y / max_in_dataset.y));
-    int z_norm = given_point.z * std::min(1, int(max_valid.z / max_in_dataset.z));
+    return min_target + ((x - min_data) * (max_target - min_target)) / (max_data - min_data);
+}
 
-    // std::cout << "point = (" << x_norm << ", " << y_norm << ")" << std::endl;
-    return Point{double(x_norm), double(y_norm), double(z_norm)};
+Point Plot::normalise_point(Point min_data, Point max_data, Point point)
+{
+    return Point{
+        double(minmax(100, window_width - 100, min_data.x, max_data.x, point.x)),
+        double(minmax(100, window_height - 100, min_data.y, max_data.y, point.y)),
+        double(minmax(100, window_depth - 100, min_data.z, max_data.z, point.z))};
 }
 
 void Plot::plot_graph()
 {
     // Raylib boilerplate
-    int window_width = 1800;
-    int window_height = 1000;
-    int centre_x = 0;
-    int centre_y = 0;
-    int centre_z = window_width / 2;
 
     InitWindow(window_width, window_height, "ParaPlot");
     SetTargetFPS(60);
@@ -101,8 +97,7 @@ void Plot::plot_graph()
     {
         // algorithm
         std::vector<Point> points_to_render{};
-        for (Point point: points) points_to_render.push_back(normalise_point(
-            point, find_max_xyz(points), Point{double(window_width), double(window_height), double(window_height)}));
+        for (Point point: points) points_to_render.push_back(normalise_point(find_min_xyz(points), find_max_xyz(points), point));
 
         // rendering logic
         BeginDrawing();
@@ -110,15 +105,15 @@ void Plot::plot_graph()
 
         for (Point point: points_to_render)
         {
-            DrawCircle(centre_x + point.x - find_min_xyz(points_to_render).x, centre_y + point.y - find_min_xyz(points_to_render).y, point_radius, RED);
+            DrawCircle(point.x, window_height - point.y, point_radius, RED);
             std::cout << "point drawn at: x = " << centre_x + point.x - find_min_xyz(points_to_render).x << "\ty = " << centre_y + point.y - find_min_xyz(points_to_render).y << std::endl;
         }
 
         for (int i = 1; i < points_to_render.size(); i++) DrawLine(
-            centre_x + points_to_render.at(i - 1).x - find_min_xyz(points_to_render).x,
-            centre_y + points_to_render.at(i - 1).y - find_min_xyz(points_to_render).y,
-            centre_x + points_to_render.at(i).x - find_min_xyz(points_to_render).x,
-            centre_y + points_to_render.at(i).y - find_min_xyz(points_to_render).y, RED);
+            points_to_render.at(i - 1).x,
+            window_height - points_to_render.at(i - 1).y,
+            points_to_render.at(i).x,
+            window_height - points_to_render.at(i).y, RED);
 
         EndDrawing();
     }
