@@ -9,13 +9,39 @@ System::System()
 {
 }
 
-//
+std::vector<Point> System::simulate()
+{
+    std::vector<Point> points =  {
+        Point{0.0, 0.0, 0.0},
+        Point{1.0, 0.0, 0.0},
+        Point{-1.0, 0.0, 0.0},
+        Point{0.0, 1.0, 0.0},
+        Point{0.0, -1.0, 0.0}
+    };
+    /*
+    double radius = 100;
+
+    // find solutions for parametric equations
+    for (double phi = 0; phi < PI; phi += 0.1)
+    {
+        for (double theta = 0; theta < 2 *PI; theta += 0.1)
+        {
+            points.push_back(Point{radius * std::sin(phi) * std::cos(theta), radius * std::sin(phi) * std::sin(theta), radius * std::cos(phi)});
+        }
+    }
+    */
+
+    return points;
+}
+
+/*
 // P1 Implementation
 //
 Point System::angle_to_cartesian(double angle, double s)
 {
     return { s * std::sin(angle), s * std::cos(angle)};
 }
+
 
 std::vector<Point> System::simulate()
 {
@@ -47,4 +73,4 @@ std::vector<Point> System::simulate()
 }
 //
 // End of P1 Implementation
-//
+*/
