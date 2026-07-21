@@ -23,14 +23,13 @@ private:
     int window_width = 1000;
     int window_height = 1000;
     int window_depth = 1000;
-    int centre_x = 0;
-    int centre_y = 0;
-    int centre_z = 0;
+    Point centre{500, 500, 500};
 
     bool conditions_changed = true;
 
-    Point transform_point(Point point, Point centre, double rotation_xy, double rotation_xz, double rotation_zy);
-    std::vector<Point> transform_points(std::vector<Point> points, Point centre, double rotation_xy, double rotation_xz, double rotation_zy);
+    std::vector<double> rotate_coords(double x, double y, double angle);
+    Point rotate_point(Point input_point, std::vector<double> rotations);
+    std::vector<Point> transform_points(std::vector<Point> points, std::vector<double> rotations_vector);
 
 public:
     Plot();

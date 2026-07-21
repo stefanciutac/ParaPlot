@@ -11,14 +11,17 @@ System::System()
 
 std::vector<Point> System::simulate()
 {
+
     std::vector<Point> points =  {
         Point{0.0, 0.0, 0.0},
-        Point{1.0, 0.0, 0.0},
-        Point{-1.0, 0.0, 0.0},
-        Point{0.0, 1.0, 0.0},
-        Point{0.0, -1.0, 0.0}
+        Point{1.0, 0.0, 1.0},
+        Point{-1.0, 0.0, -1.0},
+        Point{0.0, 1.0, 1.0},
+        Point{0.0, -1.0, -1.0}
     };
+
     /*
+    std::vector<Point> points{};
     double radius = 100;
 
     // find solutions for parametric equations
@@ -30,6 +33,7 @@ std::vector<Point> System::simulate()
         }
     }
     */
+
 
     return points;
 }
