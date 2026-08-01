@@ -5,36 +5,44 @@
 #ifndef PARAPLOT_PLOT_H
 #define PARAPLOT_PLOT_H
 
-#include <format>
 #include <vector>
-#include <raylib.h>
 
 #include "Structs.h"
+#include "System.h"
 
 class Plot
 {
 private:
+    // graph variables
     int point_radius = 30;
-    Point find_max_xyz(std::vector<Point> points);
-    Point find_min_xyz(std::vector<Point> points);
-    Point normalise_point(Point input_point, Point max_in_dataset, Point max_point);
-    double minmax(double min_target, double max_target, double min_data, double max_data, double x);
+    Point graph_centre = Point{{500, 500}};
+    int x_length = 500;
+    int y_length = 500;
+    int x_index = 3;
 
+    int pos_x_length;
+    int pos_y_length;
+    int neg_x_length;
+    int neg_y_length;
+
+    int x_padding = 50;
+
+    double x_step = 0.001;
+
+    // window variables
     int window_width = 1000;
     int window_height = 1000;
-    int window_depth = 1000;
-    int centre_x = 0;
-    int centre_y = 0;
-    int centre_z = 0;
 
-    bool conditions_changed = true;
+    double minmax(double min_target, double max_ideal, double min_in_data, double max_in_data, double x);
+    Point normalise_point(Point point);
+    std::vector<Point> normalise_points(std::vector<Point> points);
+    Point offset_point(Point point);
+    std::vector<Point> offset_points(std::vector<Point> points);
 
-    Point transform_point(Point point, Point centre, double rotation_xy, double rotation_xz, double rotation_zy);
-    std::vector<Point> transform_points(std::vector<Point> points, Point centre, double rotation_xy, double rotation_xz, double rotation_zy);
+    System system;
 
 public:
-    Plot();
-
+    Plot(const std::vector<Variable>& variables);
     void plot_graph();
 };
 

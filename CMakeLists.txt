@@ -9,6 +9,10 @@ add_executable(ParaPlot main.cpp
         Plot.cpp
         Plot.h
         Structs.h
-        Constants.h)
+        Constants.h
+        SystemDefinition.h
+        SystemDefinition.cpp
+        UIElements.cpp
+        UIElements.h)
 
 target_link_libraries(${PROJECT_NAME} raylib)

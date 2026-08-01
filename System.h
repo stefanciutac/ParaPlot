@@ -14,25 +14,12 @@
 
 class System
 {
-
 private:
-    //
-    // P1 Declaration
-    //
 
-    // parameters
-    int N = 1000;  // number of steps
-    double s = 1.0; // step size
-
-    Point angle_to_cartesian(double angle, double s);
-
-    //
-    // End of P1 declaration
-    //
 public:
-    System();
-
-    std::vector<Point> simulate();
+    System(const std::vector<Variable>& v);
+    std::vector<Point> evaluate_points(std::vector<Variable>& variables, int x_index, double step);
+    std::vector<Variable> variables;
 };
 
 
