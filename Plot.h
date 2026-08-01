@@ -9,6 +9,7 @@
 
 #include "Structs.h"
 #include "System.h"
+#include "UIElements.h"
 
 class Plot
 {
@@ -40,6 +41,7 @@ private:
     std::vector<Point> offset_points(std::vector<Point> points);
 
     System system;
+    UIElements ui_elements;
 
 public:
     Plot(const std::vector<Variable>& variables);

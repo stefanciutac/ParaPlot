@@ -10,7 +10,7 @@
 #include "UIElements.h"
 
 Plot::Plot(const std::vector<Variable>& v)
-    :system(v)
+    :system(v), ui_elements(v)
 {
 }
 
@@ -71,10 +71,10 @@ void Plot::plot_graph()
         ClearBackground(RAYWHITE);
 
         // call rendering procedures here
-        render_points(points_to_render, x_index, window_height, x_padding);
-        render_axes(graph_centre, system.variables.at(x_index), system.variables.back(), x_length, y_length,
+        ui_elements.render_points(points_to_render, x_index, window_height, x_padding);
+        ui_elements.render_axes(graph_centre, system.variables.at(x_index), system.variables.back(), x_length, y_length,
                     pos_x_length, pos_y_length, neg_x_length, neg_y_length, x_padding);
-        for (int i = 0; i < system.variables.size() - 2; i ++) render_slider(system.variables.at(i), i);
+        for (int i = 0; i < system.variables.size() - 2; i ++) ui_elements.render_slider(system.variables.at(i), i);
 
         EndDrawing();
     }
