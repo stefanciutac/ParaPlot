@@ -5,20 +5,27 @@
 #include "UIElements.h"
 
 #include <raylib.h>
+#include <iostream>
 
-
-void render_slider(Variable variable, int number)
-{
+void render_slider(Variable& variable, int number) {
     int y = number * 50 + 50;
     int length = 200;
     int x_padding = 50;
-    DrawLine(x_padding, y, x_padding + length, y, BLUE);
-
-    int radius = 10;
-    DrawCircle(x_padding + (variable.value - variable.lbound) / (variable.ubound - variable.lbound) * length, y, radius, RED);
-
     int text_padding = 20;
     int font_size = 20;
+    int radius = 10;
+
+    // poll
+    if (CheckCollisionPointCircle(GetMousePosition(), Vector2{float(x_padding + (variable.value - variable.lbound)
+        / (variable.ubound - variable.lbound) * length), float(y)}, radius)
+        && IsMouseButtonDown(0) && GetMouseX() > x_padding && GetMouseX() < x_padding + length)
+    {
+        variable.value = (double(GetMouseX()) - double(x_padding)) / double(length) * (variable.ubound - variable.lbound) + variable.lbound;
+    }
+
+    // render
+    DrawLine(x_padding, y, x_padding + length, y, BLUE);
+    DrawCircle(x_padding + (variable.value - variable.lbound) / (variable.ubound - variable.lbound) * length, y, radius, RED);
     DrawText(&variable.name.front(), x_padding + length + text_padding, y - font_size / 2, font_size, BLACK);  // potential type mismatch with first argument
 }
 
