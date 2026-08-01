@@ -5,12 +5,12 @@
 
 int main()
 {
-    const double PI = 3.14;
+    const double pi = 3.14;
     double amplitude = 5.0;
-    Plot plot({Variable{0.5, 0.0, amplitude, "amplitude"},
-                          Variable{3.0, 0.1, 10.0, "frequency"},
-                          Variable{-PI / 2, -PI / 2, PI / 2, "phase"},
-                          Variable{0.0, 0.0, 6.0, "time"},
-                          Variable{0, -amplitude, amplitude, "position"}});
+    Plot plot({Variable{0.5, 0.0, amplitude, "amplitude", GRAY},
+                          Variable{3.0, 0.1, 10.0, "frequency", BLUE},
+                          Variable{-pi / 2, -pi / 2, pi / 2, "phase", DARKBLUE},
+                          Variable{0.0, 0.0, 6.0, "time", PURPLE},
+                          Variable{0,   -amplitude, amplitude, "position", RED}});
     plot.plot_graph();
 }

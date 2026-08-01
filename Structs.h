@@ -5,6 +5,7 @@
 #ifndef PARAPLOT_STRUCTS_H
 #define PARAPLOT_STRUCTS_H
 
+#include <raylib.h>
 #include <string>
 
 struct Point
@@ -18,6 +19,7 @@ struct Variable
     double lbound;  // inclusive
     double ubound;  // exclusive
     std::string name;
+    Color colour;
 };
 
 #endif //PARAPLOT_STRUCTS_H

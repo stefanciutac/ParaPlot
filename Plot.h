@@ -16,17 +16,12 @@ class Plot
 private:
     // graph variables
     int point_radius = 30;
-    Point graph_centre = Point{{500, 500}};
-    int x_length = 500;
-    int y_length = 500;
+    Point graph_centre = Point{{500, 300}};
+    int x_length = 400;
+    int y_length = 200;
     int x_index = 3;
 
-    int pos_x_length;
-    int pos_y_length;
-    int neg_x_length;
-    int neg_y_length;
-
-    int x_padding = 50;
+    int x_padding = 25;
 
     double x_step = 0.001;
 

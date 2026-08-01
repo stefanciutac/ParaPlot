@@ -24,7 +24,7 @@ Point Plot::normalise_point(Point point)
 {
     point.dims.at(x_index) = minmax(0, x_length, system.variables.at(x_index).lbound,
         system.variables.at(x_index).ubound, point.dims.at(x_index));
-    point.dims.back() = minmax(0, x_length, system.variables.back().lbound, system.variables.back().ubound, point.dims.back());
+    point.dims.back() = minmax(0, y_length, system.variables.back().lbound, system.variables.back().ubound, point.dims.back());
     return point;
 }
 
@@ -54,7 +54,7 @@ void Plot::plot_graph()
 {
     // Raylib boilerplate
     InitWindow(window_width, window_height, "ParaPlot");
-    SetTargetFPS(60);
+    SetTargetFPS(90);
 
     // main rendering loop
     while(!WindowShouldClose())
@@ -64,16 +64,15 @@ void Plot::plot_graph()
         std::vector<Point> points_to_render{};
         std::vector<Point> points_to_normalise = system.evaluate_points(system.variables, x_index, x_step);
         std::vector<Point> normalised_points = normalise_points(points_to_normalise);
-        points_to_render = offset_points(normalised_points);
+        points_to_render = normalised_points;
 
         // rendering logic
         BeginDrawing();
         ClearBackground(RAYWHITE);
 
         // call rendering procedures here
-        ui_elements.render_points(points_to_render, x_index, window_height, x_padding);
-        ui_elements.render_axes(graph_centre, system.variables.at(x_index), system.variables.back(), x_length, y_length,
-                    pos_x_length, pos_y_length, neg_x_length, neg_y_length, x_padding);
+        ui_elements.render_points(points_to_render, graph_centre, x_index, system.variables);
+        ui_elements.render_axes(graph_centre, system.variables.at(x_index), system.variables.back(), x_length, y_length, window_width, window_height);
         for (int i = 0; i < system.variables.size() - 2; i ++) ui_elements.render_slider(system.variables.at(i), i);
 
         EndDrawing();
