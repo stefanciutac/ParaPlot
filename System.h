@@ -17,9 +17,12 @@ class System
 private:
 
 public:
-    System(const std::vector<Variable>& v);
-    std::vector<Point> evaluate_points(std::vector<Variable>& variables, int x_index, double step);
+    System(const std::vector<Variable>& v, int i, double s);
+    Point evaluate_point();
+    std::vector<Point> evaluate_points();
     std::vector<Variable> variables;
+    int x_index;
+    double step;
 };
 
 

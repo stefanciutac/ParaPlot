@@ -10,8 +10,6 @@ add_executable(ParaPlot main.cpp
         Plot.h
         Structs.h
         Constants.h
-        SystemDefinition.h
-        SystemDefinition.cpp
         UIElements.cpp
         UIElements.h)
 

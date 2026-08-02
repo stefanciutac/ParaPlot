@@ -9,14 +9,16 @@
 #include "System.h"
 #include "UIElements.h"
 
-Plot::Plot(const std::vector<Variable>& v)
-    :system(v), ui_elements(v)
+Plot::Plot(const std::vector<Variable>& variables, int x_index, double step, int window_width, int window_height, int fps,
+           double x_grid_interval, double y_grid_interval)
+    :system(variables, x_index, step), ui_elements(variables), x_index(x_index), x_step(step), window_width(window_width),
+            window_height(window_height), fps(fps), x_grid_interval(x_grid_interval), y_grid_interval(y_grid_interval)
 {
-    macros.resize(v.size());
-    recording_macro.resize(v.size());
-    playing_macro.resize(v.size());
-    is_empty_macro.resize(v.size());
-    frame_counters.resize(v.size());
+    macros.resize(variables.size());
+    recording_macro.resize(variables.size());
+    playing_macro.resize(variables.size());
+    is_empty_macro.resize(variables.size());
+    frame_counters.resize(variables.size());
 }
 
 double Plot::minmax(double min_ideal, double max_ideal, double min_in_data, double max_in_data, double x)
@@ -69,7 +71,37 @@ void Plot::manage_macros()
             macros.at(i).push_back(system.variables.at(i).value);
         }
         if (frame_counters.at(i) >= macros.at(i).size() - 1) frame_counters.at(i) = 0;
-        std::cout << macros.at(i).size() << std::endl;
+    }
+}
+
+void Plot::poll_macro_buttons()
+{
+    for (int i = 0; i < system.variables.size() - 2; i ++)
+    {
+        std::string text;
+        if (!is_empty_macro.at(i)) text = "Rec Macro";
+        else if (recording_macro.at(i)) text = "Stop Rec";
+        else text = "Clear Macro";
+
+        bool is_toggled = false;
+        ui_elements.render_button(is_toggled, i, 1, window_width, text);
+
+        if (!is_empty_macro.at(i) && is_toggled)
+        {
+            recording_macro.at(i) = true;
+            is_empty_macro.at(i) = !is_empty_macro.at(i);
+        }
+        else if (recording_macro.at(i) && is_toggled)
+        {
+            playing_macro.at(i) = true;
+            recording_macro.at(i) = false;
+        }
+        else if (playing_macro.at(i) && is_toggled)
+        {
+            macros.at(i).clear();
+            is_empty_macro.at(i) = !is_empty_macro.at(i);
+            playing_macro.at(i) = false;
+        }
     }
 }
 
@@ -77,7 +109,7 @@ void Plot::plot_graph()
 {
     // Raylib boilerplate
     InitWindow(window_width, window_height, "ParaPlot");
-    SetTargetFPS(90);
+    SetTargetFPS(fps);
 
     // main rendering loop
     while(!WindowShouldClose())
@@ -87,7 +119,7 @@ void Plot::plot_graph()
 
         // evaluate function
         std::vector<Point> points_to_render{};
-        std::vector<Point> points_to_normalise = system.evaluate_points(system.variables, x_index, x_step);
+        std::vector<Point> points_to_normalise = system.evaluate_points();
         std::vector<Point> normalised_points = normalise_points(points_to_normalise);
         points_to_render = normalised_points;
 
@@ -96,50 +128,24 @@ void Plot::plot_graph()
         ClearBackground(RAYWHITE);
 
         // call rendering procedures here
-        ui_elements.render_points(points_to_render, graph_centre, x_index, system.variables);
-        ui_elements.render_axes(graph_centre, system.variables.at(x_index), system.variables.back(), x_length, y_length, window_width, window_height);
+        ui_elements.render_points(points_to_render, graph_corner, x_index, system.variables);
+        ui_elements.render_axes(graph_corner, system.variables.at(x_index), system.variables.back(), x_length, y_length, window_width, window_height);
 
         for (int i = 0; i < system.variables.size() - 2; i ++) ui_elements.render_slider(system.variables.at(i), i);  // change -2 to not last and not x_index
-        for (int i = 0; i < system.variables.size() - 2; i ++)
-        {
-            std::string text;
-            if (!is_empty_macro.at(i)) text = "Rec Macro";
-            else if (recording_macro.at(i)) text = "Stop Rec";
-            else text = "Clear Macro";
-
-            bool is_toggled = false;
-            ui_elements.render_button(is_toggled, i, 1, window_width, text);
-
-            if (!is_empty_macro.at(i) && is_toggled)
-            {
-                recording_macro.at(i) = true;
-                is_empty_macro.at(i) = !is_empty_macro.at(i);
-            }
-            else if (recording_macro.at(i) && is_toggled)
-            {
-                playing_macro.at(i) = true;
-                recording_macro.at(i) = false;
-            }
-            else if (playing_macro.at(i) && is_toggled)
-            {
-                macros.at(i).clear();
-                is_empty_macro.at(i) = !is_empty_macro.at(i);
-                playing_macro.at(i) = false;
-            }
-        }
+        poll_macro_buttons();
 
         int x_interval = minmax(0, x_length, 0,
         (system.variables.at(x_index).ubound - system.variables.at(x_index).lbound), x_grid_interval);
         int y_interval = minmax(0, y_length, 0,
         (system.variables.back().ubound - system.variables.back().lbound), y_grid_interval);
 
-        if (show_grid) ui_elements.render_grid(graph_centre, x_interval, y_interval, x_length, y_length);
+        if (show_grid) ui_elements.render_grid(graph_corner, x_interval, y_interval, x_length, y_length);
         ui_elements.render_button(show_grid, 0, 0, window_width, "Toggle Grid");
 
         int title_offset = -300;
         int x_label_offset = 15;
         int y_label_offset = 30;
-        ui_elements.render_labels(graph_centre, x_interval, y_interval, x_length, y_length, title_offset, x_label_offset,
+        ui_elements.render_labels(graph_corner, x_interval, y_interval, x_length, y_length, title_offset, x_label_offset,
             y_label_offset, "Displacement Against Time in a Simple Harmonic Oscillator", "T/s", "S/m",
             system.variables.at(x_index), system.variables.back());
 
