@@ -6,6 +6,7 @@
 
 #include <raylib.h>
 #include <iostream>
+#include <cmath>
 
 UIElements::UIElements(std::vector<Variable> v)
 {
@@ -99,6 +100,113 @@ void UIElements::render_axes(Point& corner, Variable x, Variable y, int& x_lengt
         std::min(window_height, std::max(0, int(corner.dims.back() - y_length))),
         axes_colour);
 
+}
+
+void UIElements::render_button(bool& show_grid, int number_vertical, int number_horizontal, int window_width, std::string text)
+{
+    int x_padding = 35;
+    int y_padding = 30;
+    float button_height = 40;
+    float button_width = 145;
+    float button_x = window_width - button_width - x_padding - (number_horizontal * (button_width + 10));;
+    float button_y = number_vertical * 50 + y_padding;
+
+    int font_size = 20;
+
+    Rectangle button = {button_x, button_y, button_width, button_height};
+    bool is_hovering = CheckCollisionPointRec(GetMousePosition(), button);
+    bool has_clicked = IsMouseButtonPressed(0);
+
+    Color default_colour = {161, 160, 161, 192};
+    Color hover_colour = {255, 0, 0, 192};
+    Color clicked_colour = RED;
+
+    if (is_hovering && has_clicked)
+    {
+        DrawRectangleRec(button, clicked_colour);
+        if (show_grid) show_grid = false;
+        else show_grid = true;
+    }
+    else if (is_hovering) DrawRectangleRec(button, hover_colour);
+    else DrawRectangleRec(button, default_colour);
+
+    float text_x_offset = 10;
+    float text_y_offset = 10;
+
+    DrawText(&text.front(), button_x + text_x_offset, button_y + text_y_offset, font_size, BLACK);
+}
+
+void UIElements::render_grid(Point corner, int x_interval, int y_interval, int x_length, int y_length)
+{
+    int cx = corner.dims.front();
+    int cy = corner.dims.back();
+
+    Color grid_colour = {113, 111, 113, 192};
+
+    for (int i = 0; i <= x_length; i += x_interval) DrawLine(cx + i, cy, cx + i, cy - y_length, grid_colour);
+    for (int i = 0; i <= y_length; i += y_interval) DrawLine(cx, cy - i, cx + x_length, cy - i, grid_colour);
+}
+
+std::string UIElements::round(int no_of_dp, float x)
+{
+    std::string var = std::to_string(x);
+    std::string rounded_x{};
+
+    bool point_reached = false;
+    int decimal_counter{};
+
+    for (char letter: var)
+    {
+        if (letter != '.' && !point_reached) rounded_x += letter;
+        else if (letter != '.' && point_reached && decimal_counter < no_of_dp)
+        {
+            rounded_x += letter;
+            decimal_counter ++;
+        }
+        else if (letter == '.')
+        {
+            rounded_x += letter;
+            point_reached = true;
+        }
+    }
+    return rounded_x;
+}
+
+void UIElements::render_labels(Point corner, int x_interval, int y_interval, int x_length, int y_length, int title_offset,
+    int x_label_offset, int y_label_offset, std::string title, std::string x_label, std::string y_label, Variable x, Variable y)
+{
+    int cx = corner.dims.front();
+    int cy = corner.dims.back();
+
+    int nums_x_offset = -5;
+    int nums_y_offset = 5;
+    Vector2 title_xy = {float(x_length / 2 + cx + title_offset), float(cy - y_length - 40)};
+    Vector2 x_label_xy = {float(x_length / 2 + cx + x_label_offset), float(cy + 30)};
+    Vector2 y_label_xy = {float(cx - 30 - y_label_offset), float(cy - y_length / 2)};
+
+    // render graph and axis titles
+    DrawText(&title.front(), title_xy.x, title_xy.y, 20, BLACK);
+    DrawText(&x_label.front(), x_label_xy.x, x_label_xy.y, 15, BLACK);
+    DrawText(&y_label.front(), y_label_xy.x, y_label_xy.y, 15, BLACK);
+
+    int x_tick_length = x_length / 140;
+    int y_tick_length = y_length / 140;
+
+    // render ticks
+    for (int i = 0; i <= x_length; i += x_interval) DrawLine(cx + i, cy + x_tick_length, cx + i, cy - x_tick_length, BLACK);
+    for (int i = 0; i <= y_length; i += y_interval) DrawLine(cx - y_tick_length, cy - i, cx + y_tick_length, cy - i, BLACK);
+
+    // render scale
+    for (int i = 0; i <= x_length; i += x_interval)
+    {
+        std::string x_text = round(1, (x.ubound - x.lbound) * (float(i) / float(x_length)) + x.lbound);
+        DrawText(&x_text.front(), cx + i, cy + 15, 10, BLACK);
+    }
+    for (int i = 0; i <= y_length; i += y_interval)
+    {
+        std::string y_text = round(1, (y.ubound - y.lbound) * (float(i) / float(y_length)) + y.lbound);
+        DrawText(&y_text.front(), cx - 25, cy - i, 10, BLACK);
+    }
 }
 
 void UIElements::render_points(std::vector<Point> points, Point corner, int x_index, std::vector<Variable> variables)

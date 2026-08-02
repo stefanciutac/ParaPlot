@@ -12,6 +12,7 @@
 Plot::Plot(const std::vector<Variable>& v)
     :system(v), ui_elements(v)
 {
+    macros.resize(v.size());
 }
 
 double Plot::minmax(double min_ideal, double max_ideal, double min_in_data, double max_in_data, double x)
@@ -50,6 +51,20 @@ std::vector<Point> Plot::offset_points(std::vector<Point> points)
     return offset_points;
 }
 
+/*
+std::vector<Point> Plot::manage_macros()
+{
+    for (int i = 0; i < system.variables.size(); i ++)
+    {
+        if (frame_counter > macro_duration_frames) break;  // change frame counter logic once vectors implemented
+        if (macros.at(i).size())
+        {
+            system.variables.at(i).value = macro_duration_frames / frame_counter * system.variables.at(i).ubound;
+        }
+    }
+}
+*/
+
 void Plot::plot_graph()
 {
     // Raylib boilerplate
@@ -59,7 +74,6 @@ void Plot::plot_graph()
     // main rendering loop
     while(!WindowShouldClose())
     {
-        // poll input
         // evaluate function
         std::vector<Point> points_to_render{};
         std::vector<Point> points_to_normalise = system.evaluate_points(system.variables, x_index, x_step);
@@ -73,7 +87,23 @@ void Plot::plot_graph()
         // call rendering procedures here
         ui_elements.render_points(points_to_render, graph_centre, x_index, system.variables);
         ui_elements.render_axes(graph_centre, system.variables.at(x_index), system.variables.back(), x_length, y_length, window_width, window_height);
+
         for (int i = 0; i < system.variables.size() - 2; i ++) ui_elements.render_slider(system.variables.at(i), i);
+
+        int x_interval = minmax(0, x_length, 0,
+        (system.variables.at(x_index).ubound - system.variables.at(x_index).lbound), x_grid_interval);
+        int y_interval = minmax(0, y_length, 0,
+        (system.variables.back().ubound - system.variables.back().lbound), y_grid_interval);
+
+        if (show_grid) ui_elements.render_grid(graph_centre, x_interval, y_interval, x_length, y_length);
+        ui_elements.render_button(show_grid, 0, 0, window_width, "Toggle Grid");
+
+        int title_offset = -300;
+        int x_label_offset = 15;
+        int y_label_offset = 30;
+        ui_elements.render_labels(graph_centre, x_interval, y_interval, x_length, y_length, title_offset, x_label_offset,
+            y_label_offset, "Displacement Against Time in a Simple Harmonic Oscillator", "T/s", "S/m",
+            system.variables.at(x_index), system.variables.back());
 
         EndDrawing();
     }
