@@ -26,6 +26,6 @@ public:
     void render_labels(Point corner, int x_interval, int y_interval, int x_length, int y_length, int title_offset, int x_label_offset,
         int y_label_offset, std::string title, std::string x_label, std::string y_label, Variable x, Variable y);
 
-    std::string round(int no_of_dp, float x);
+    std::string truncate(int no_of_dp, float x);
 };
 #endif //PARAPLOT_UIELEMENTS_H

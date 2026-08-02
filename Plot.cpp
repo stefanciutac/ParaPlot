@@ -13,6 +13,10 @@ Plot::Plot(const std::vector<Variable>& v)
     :system(v), ui_elements(v)
 {
     macros.resize(v.size());
+    recording_macro.resize(v.size());
+    playing_macro.resize(v.size());
+    is_empty_macro.resize(v.size());
+    frame_counters.resize(v.size());
 }
 
 double Plot::minmax(double min_ideal, double max_ideal, double min_in_data, double max_in_data, double x)
@@ -51,19 +55,23 @@ std::vector<Point> Plot::offset_points(std::vector<Point> points)
     return offset_points;
 }
 
-/*
-std::vector<Point> Plot::manage_macros()
+void Plot::manage_macros()
 {
     for (int i = 0; i < system.variables.size(); i ++)
     {
-        if (frame_counter > macro_duration_frames) break;  // change frame counter logic once vectors implemented
-        if (macros.at(i).size())
+        if (playing_macro.at(i) && frame_counters.at(i) < macros.at(i).size())
         {
-            system.variables.at(i).value = macro_duration_frames / frame_counter * system.variables.at(i).ubound;
+            system.variables.at(i).value = macros.at(i).at(frame_counters.at(i));
+            frame_counters.at(i) ++;
         }
+        else if (recording_macro.at(i))
+        {
+            macros.at(i).push_back(system.variables.at(i).value);
+        }
+        if (frame_counters.at(i) >= macros.at(i).size() - 1) frame_counters.at(i) = 0;
+        std::cout << macros.at(i).size() << std::endl;
     }
 }
-*/
 
 void Plot::plot_graph()
 {
@@ -74,6 +82,9 @@ void Plot::plot_graph()
     // main rendering loop
     while(!WindowShouldClose())
     {
+        // check for macros
+        manage_macros();
+
         // evaluate function
         std::vector<Point> points_to_render{};
         std::vector<Point> points_to_normalise = system.evaluate_points(system.variables, x_index, x_step);
@@ -88,7 +99,34 @@ void Plot::plot_graph()
         ui_elements.render_points(points_to_render, graph_centre, x_index, system.variables);
         ui_elements.render_axes(graph_centre, system.variables.at(x_index), system.variables.back(), x_length, y_length, window_width, window_height);
 
-        for (int i = 0; i < system.variables.size() - 2; i ++) ui_elements.render_slider(system.variables.at(i), i);
+        for (int i = 0; i < system.variables.size() - 2; i ++) ui_elements.render_slider(system.variables.at(i), i);  // change -2 to not last and not x_index
+        for (int i = 0; i < system.variables.size() - 2; i ++)
+        {
+            std::string text;
+            if (!is_empty_macro.at(i)) text = "Rec Macro";
+            else if (recording_macro.at(i)) text = "Stop Rec";
+            else text = "Clear Macro";
+
+            bool is_toggled = false;
+            ui_elements.render_button(is_toggled, i, 1, window_width, text);
+
+            if (!is_empty_macro.at(i) && is_toggled)
+            {
+                recording_macro.at(i) = true;
+                is_empty_macro.at(i) = !is_empty_macro.at(i);
+            }
+            else if (recording_macro.at(i) && is_toggled)
+            {
+                playing_macro.at(i) = true;
+                recording_macro.at(i) = false;
+            }
+            else if (playing_macro.at(i) && is_toggled)
+            {
+                macros.at(i).clear();
+                is_empty_macro.at(i) = !is_empty_macro.at(i);
+                playing_macro.at(i) = false;
+            }
+        }
 
         int x_interval = minmax(0, x_length, 0,
         (system.variables.at(x_index).ubound - system.variables.at(x_index).lbound), x_grid_interval);

@@ -36,9 +36,11 @@ private:
     UIElements ui_elements;
 
     // macro variables
-    int frame_counter{};
     std::vector<std::vector<double>> macros{};
-    std::vector<bool> is_recording_macro;
+    std::vector<bool> recording_macro{};
+    std::vector<bool> playing_macro{};
+    std::vector<bool> is_empty_macro{};
+    std::vector<int> frame_counters{};
     double macro_duration_seconds = 5.0;
     int macro_duration_frames = fps * macro_duration_seconds;
 
@@ -48,6 +50,7 @@ private:
     std::vector<Point> normalise_points(std::vector<Point> points);
     Point offset_point(Point point);
     std::vector<Point> offset_points(std::vector<Point> points);
+    void manage_macros();
 
 public:
     Plot(const std::vector<Variable>& variables);

@@ -124,8 +124,7 @@ void UIElements::render_button(bool& show_grid, int number_vertical, int number_
     if (is_hovering && has_clicked)
     {
         DrawRectangleRec(button, clicked_colour);
-        if (show_grid) show_grid = false;
-        else show_grid = true;
+        show_grid  = !show_grid;
     }
     else if (is_hovering) DrawRectangleRec(button, hover_colour);
     else DrawRectangleRec(button, default_colour);
@@ -147,7 +146,7 @@ void UIElements::render_grid(Point corner, int x_interval, int y_interval, int x
     for (int i = 0; i <= y_length; i += y_interval) DrawLine(cx, cy - i, cx + x_length, cy - i, grid_colour);
 }
 
-std::string UIElements::round(int no_of_dp, float x)
+std::string UIElements::truncate(int no_of_dp, float x)
 {
     std::string var = std::to_string(x);
     std::string rounded_x{};
@@ -199,12 +198,12 @@ void UIElements::render_labels(Point corner, int x_interval, int y_interval, int
     // render scale
     for (int i = 0; i <= x_length; i += x_interval)
     {
-        std::string x_text = round(1, (x.ubound - x.lbound) * (float(i) / float(x_length)) + x.lbound);
+        std::string x_text = truncate(1, (x.ubound - x.lbound) * (float(i) / float(x_length)) + x.lbound);
         DrawText(&x_text.front(), cx + i, cy + 15, 10, BLACK);
     }
     for (int i = 0; i <= y_length; i += y_interval)
     {
-        std::string y_text = round(1, (y.ubound - y.lbound) * (float(i) / float(y_length)) + y.lbound);
+        std::string y_text = truncate(1, (y.ubound - y.lbound) * (float(i) / float(y_length)) + y.lbound);
         DrawText(&y_text.front(), cx - 25, cy - i, 10, BLACK);
     }
 }
