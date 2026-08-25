@@ -162,7 +162,7 @@ void Plot::plot_graph()
         conditions_changed = false;
 
 
-        points_to_render = transform_points(points_to_render, {0.0, 0.0, 0.2});
+        points_to_render = transform_points(points_to_render, {0.2, 0.0, 0.0});
 
 
         Point min_point = find_min_xyz(points_to_render);
